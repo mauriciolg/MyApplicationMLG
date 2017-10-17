@@ -22,6 +22,14 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "openweatherimagen";
 
+    //Variables para el Bundle savedInstanceState
+    private static final String IDENTIFICADOR_KEY = "Identificador del ImageView";
+    private static final String TEMPERATURA_KEY = "Temperatura";
+    private int identificador_guardado;
+    private String temperatura_guardada;
+    //-------------------------------------------
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -31,11 +39,21 @@ public class MainActivity extends AppCompatActivity {
         final ImageView iv_weather = (ImageView) findViewById(R.id.iv_weather);
         final TextView tv_temp = (TextView) findViewById(R.id.tv_temp);
 
+        //Cargar el estado guardado si existe
+        if (savedInstanceState != null){
+            identificador_guardado = savedInstanceState.getInt(IDENTIFICADOR_KEY);
+            temperatura_guardada = savedInstanceState.getString(TEMPERATURA_KEY);
+
+            //Asignar el identificador a la ImageView
+            iv_weather.setImageDrawable(getResources().getDrawable(identificador_guardado, null));
+            //Asignar la temperatura al TextView
+            tv_temp.setText(temperatura_guardada);
+        }
 
         //Cola de peticiones
         RequestQueue queue = Volley.newRequestQueue(this);
 
-        String url = "http://192.168.1.69/ejemplo1/clima";
+        String url = "http://192.168.1.66/ejemplo1/clima";
 
         JsonObjectRequest jsObjRequest = new JsonObjectRequest
                 (Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
@@ -56,6 +74,8 @@ public class MainActivity extends AppCompatActivity {
                                     // Identificador de la imagen
                                     int identificador = getResources().getIdentifier("img_" + icon, "drawable", getPackageName());
 
+                                    identificador_guardado = identificador;
+
                                     //Asignar el identificador a la ImageView
                                     iv_weather.setImageDrawable(getResources().getDrawable(identificador, null));
                                 }
@@ -63,8 +83,10 @@ public class MainActivity extends AppCompatActivity {
                                     JSONObject main = response.getJSONObject("main");
 
                                     double temp = main.getDouble("temp");
+                                    String temperatura = "" + temp + "\u00b0";
+                                    temperatura_guardada = temperatura;
 
-                                    tv_temp.setText("" + temp + "\u00b0");
+                                    tv_temp.setText(temperatura);
                                 }
                             }
                         } catch (JSONException e) {
@@ -83,4 +105,17 @@ public class MainActivity extends AppCompatActivity {
                 });
         queue.add(jsObjRequest);
     }
+
+    //Guardar el estado actual para poder cargarlo si la applicación pasa del estado
+    //onPause y se dedestruye el proceso de la app. Por ejemplo cuando cambia la
+    //orientación de la pantalla
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState){
+        savedInstanceState.putInt(IDENTIFICADOR_KEY, identificador_guardado);
+        savedInstanceState.putString(TEMPERATURA_KEY, temperatura_guardada);
+
+        super.onSaveInstanceState(savedInstanceState);
+    }
 }
+
+
