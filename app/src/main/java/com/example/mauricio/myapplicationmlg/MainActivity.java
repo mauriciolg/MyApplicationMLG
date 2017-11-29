@@ -5,6 +5,7 @@ import android.Manifest;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.support.v4.app.ActivityCompat;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -40,8 +41,10 @@ public class MainActivity extends AppCompatActivity {
     //Variables para el Bundle savedInstanceState
     private static final String IDENTIFICADOR_KEY = "Identificador del ImageView";
     private static final String TEMPERATURA_KEY = "Temperatura";
+    private static final String CIUDAD_KEY = "Ciudad";
     private int identificador_guardado;
     private String temperatura_guardada;
+    private String ciudad_guardada;
     //-------------------------------------------
 
 
@@ -50,15 +53,23 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        ActionBar actionBar = getSupportActionBar();
+        actionBar.setDisplayShowHomeEnabled(true);
+        actionBar.setIcon(R.mipmap.ic_launcher_round);
+
         //Recurso de la ImageView
         final ImageView iv_weather = (ImageView) findViewById(R.id.iv_weather);
         final TextView tv_temp = (TextView) findViewById(R.id.tv_temp);
+        final TextView tv_ciudad = (TextView) findViewById(R.id.tv_ciudad);
 
         //Cargar el estado guardado si existe
-        if (savedInstanceState != null){
+        if (savedInstanceState != null) {
             identificador_guardado = savedInstanceState.getInt(IDENTIFICADOR_KEY);
             temperatura_guardada = savedInstanceState.getString(TEMPERATURA_KEY);
+            ciudad_guardada = savedInstanceState.getString(CIUDAD_KEY);
 
+            //Asignar el identificador del TextView del nombre de la ciudad
+            tv_ciudad.setText(ciudad_guardada);
             //Asignar el identificador a la ImageView
             iv_weather.setImageDrawable(getResources().getDrawable(identificador_guardado, null));
             //Asignar la temperatura al TextView
@@ -92,7 +103,7 @@ public class MainActivity extends AppCompatActivity {
     /***
      * Solicita la ubicacion mediante GPS. Primero se tiene que verificar que el usuario otorgue los permisos.
      */
-    private void getLocation(){
+    private void getLocation() {
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
 
@@ -115,7 +126,7 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onLocationChanged(Location location) {
 
-                        LatLng newLocation = new LatLng(location.getLatitude(),location.getLongitude());
+                        LatLng newLocation = new LatLng(location.getLatitude(), location.getLongitude());
 
                         makeHttpRequest(newLocation);
 
@@ -128,7 +139,7 @@ public class MainActivity extends AppCompatActivity {
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         if (requestCode == REQUEST_LOCATION) {
             if (permissions.length == 1 &&
-                    permissions[0].equals(Manifest.permission.ACCESS_FINE_LOCATION)  &&
+                    permissions[0].equals(Manifest.permission.ACCESS_FINE_LOCATION) &&
                     grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 //Tenemos permisos
                 getLocation();
@@ -146,7 +157,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
 
-        if(mGoogleApiClient != null) {
+        if (mGoogleApiClient != null) {
             mGoogleApiClient.connect();
         }
 
@@ -156,16 +167,17 @@ public class MainActivity extends AppCompatActivity {
     protected void onStop() {
         super.onStop();
 
-        if(mGoogleApiClient != null) {
+        if (mGoogleApiClient != null) {
             mGoogleApiClient.disconnect();
         }
     }
 
 
-    private void makeHttpRequest(LatLng newLocation){
-        //Recurso de la ImageView
+    private void makeHttpRequest(LatLng newLocation) {
+        //Recurso de la ImageView y Text View
         final ImageView iv_weather = (ImageView) findViewById(R.id.iv_weather);
         final TextView tv_temp = (TextView) findViewById(R.id.tv_temp);
+        final TextView tv_ciudad = (TextView) findViewById(R.id.tv_ciudad);
 
         //Cola de peticiones
         RequestQueue queue = Volley.newRequestQueue(this);
@@ -181,14 +193,18 @@ public class MainActivity extends AppCompatActivity {
 
                         try {
 
+                            if (response.has("name")) {
+                                String ciudad = response.getString("name");
+                                tv_ciudad.setText(ciudad);
+                                ciudad_guardada = ciudad;
+                                Log.v(TAG, "Ciudad: " + ciudad);
+                            }
+
                             if (response.has("weather")) {
 
                                 JSONArray weatherArray = response.getJSONArray("weather");
                                 JSONObject weather = weatherArray.getJSONObject(0);
 
-
-                                String ciudad = response.getString("name");
-                                Log.v(TAG, "Ciudad: " + ciudad);
 
                                 if (weather.has("icon")) {
 
@@ -241,9 +257,10 @@ public class MainActivity extends AppCompatActivity {
     //onPause y se dedestruye el proceso de la app. Por ejemplo cuando cambia la
     //orientación de la pantalla
     @Override
-    public void onSaveInstanceState(Bundle savedInstanceState){
+    public void onSaveInstanceState(Bundle savedInstanceState) {
         savedInstanceState.putInt(IDENTIFICADOR_KEY, identificador_guardado);
         savedInstanceState.putString(TEMPERATURA_KEY, temperatura_guardada);
+        savedInstanceState.putString(CIUDAD_KEY, ciudad_guardada);
 
         super.onSaveInstanceState(savedInstanceState);
     }

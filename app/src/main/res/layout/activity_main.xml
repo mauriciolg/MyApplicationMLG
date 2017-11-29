@@ -1,32 +1,50 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.example.mauricio.myapplicationmlg.MainActivity">
 
-        <ImageView
-            android:contentDescription="imagen del clima"
-            android:id="@+id/iv_weather"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            />
+    <TextView
+        android:id="@+id/tv_ciudad"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/iv_weather"
+        android:paddingBottom="50sp"
+        android:layout_centerHorizontal="true"
+        android:textColor="#607D8B"
+        android:textSize="52sp"
+        android:textAlignment="center"/>
 
-        <TextView
-            android:id="@+id/tv_temp"
-            android:layout_below="@+id/iv_weather"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:textSize="48sp"
-            android:textColor="#607D8B"/>
+    <ImageView
+        android:id="@+id/iv_weather"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:contentDescription="imagen del clima" />
 
+    <TextView
+        android:id="@+id/tv_temp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/iv_weather"
+        android:layout_centerHorizontal="true"
+        android:paddingTop="25sp"
+        android:textColor="#607D8B"
+        android:textSize="48sp" />
 
-
-
-
+    <TextView
+        android:id="@+id/tv_copyright"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingBottom="5sp"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:textColor="#607D8B"
+        android:textSize="10sp"
+        android:textAlignment="center"
+        android:text="@string/copy"
+        />
 
 </RelativeLayout>
